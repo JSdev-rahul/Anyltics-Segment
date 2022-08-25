@@ -1,0 +1,113 @@
+ /// Requirement 
+
+ we have genrate the logs of application on every page and event occured by user 
+
+//////////////////////////////////////////////////////
+
+
+Some Imp Link 
+
+for implimentation = https://github.com/segmentio/analytics-next#-using-as-an-npm-package
+
+Api to get data in app =https://segment.com/docs/personas/profile-api/#api-reference
+
+use Segment workspace for debuger 
+
+////////////////////////////////////////////////////////
+
+Documenttaion = https://segment.com/docs/personas/profile-api/
+
+ We use Segment libary for that And also The debuger (on its web  ) 
+
+ 1. install libary 
+
+ # npm
+npm install @segment/analytics-next
+
+# yarn
+yarn add @segment/analytics-next
+
+# pnpm
+pnpm add @segment/analytics-next
+
+
+2. Import the package into your project and you're good to go (with working types)!
+
+
+import { AnalyticsBrowser } from '@segment/analytics-next'
+
+const analytics = AnalyticsBrowser.load({ writeKey: '<YOUR_WRITE_KEY>' })
+
+analytics.identify('hello world')
+
+document.body?.addEventListener('click', () => {
+  analytics.track('document body clicked!')
+})
+
+
+3.  using React (Simple / client-side only) 
+
+import { AnalyticsBrowser } from '@segment/analytics-next'
+
+// we can export this instance to share with rest of our codebase.
+export const analytics = AnalyticsBrowser.load({ writeKey: '<YOUR_WRITE_KEY>' })
+
+const App = () => (
+  <div>
+    <button onClick={() => analytics.track('hello world')}>Track</button>
+  </div>
+)
+
+
+4. using React (Advanced w/ React Context)
+
+const AnalyticsContext = React.createContext<AnalyticsBrowser>(undefined!);
+
+type Props = {
+  writeKey: string;
+  children: React.ReactNode;
+};
+export const AnalyticsProvider = ({ children, writeKey }: Props) => {
+  const analytics = React.useMemo(
+    () => AnalyticsBrowser.load({ writeKey }),
+    [writeKey]
+  );
+  return (
+    <AnalyticsContext.Provider value={analytics}>
+      {children}
+    </AnalyticsContext.Provider>
+  );
+};
+
+// Create an analytics hook that we can use with other components.
+export const useAnalytics = () => {
+  const result = React.useContext(AnalyticsContext);
+  if (!result) {
+    throw new Error("Context used outside of its Provider!");
+  }
+  return result;
+};
+
+// 
+// use the context we just created...
+
+
+const TrackButton = () => {
+  const analytics = useAnalytics()
+  return (
+    <button onClick={() => analytics.track('hello world').then(console.log)}>
+      Track!
+    </button>
+  )
+}
+
+const App = () => {
+  return (
+    <AnalyticsProvider writeKey='<YOUR_WRITE_KEY>'>
+      <TrackButton />
+    </AnalyticsProvider>
+  )
+
+
+
+  //////////////////////////////////////////////////////////////////

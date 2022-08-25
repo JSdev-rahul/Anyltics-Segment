@@ -1,0 +1,25 @@
+import { AnalyticsBrowser } from "@segment/analytics-next";
+import React from "react";
+export const AnalyticsContext = React.createContext(AnalyticsBrowser);
+const Props = {
+  writeKey: "oUpeyYuXfAJV0glsFcjfR1BARroS9lGe",
+  children: React.ReactNode,
+};
+export const AnalyticsProvider = ({ children, writeKey } = Props) => {
+  const analytics = React.useMemo(
+    () => AnalyticsBrowser.load({ writeKey }),
+    [writeKey]
+  );
+  return (
+    <AnalyticsContext.Provider value={analytics}>
+      {children}
+    </AnalyticsContext.Provider>
+  );
+};
+export const useAnalytics = () => {
+  const result = React.useContext(AnalyticsContext);
+  if (!result) {
+    throw new Error("Context used outside of its Provider!");
+  }
+  return result;
+};
